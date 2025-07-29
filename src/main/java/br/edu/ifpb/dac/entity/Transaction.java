@@ -1,5 +1,6 @@
 package br.edu.ifpb.dac.entity;
 
+import br.edu.ifpb.dac.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

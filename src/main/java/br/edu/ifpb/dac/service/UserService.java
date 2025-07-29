@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -25,9 +26,15 @@ public class UserService {
 
     public void register(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        if (user.getRoles() == null || user.getRoles().isEmpty()) {
+
+        boolean adminExists = userRepository.existsByRoles(Role.ROLE_ADMIN);
+
+        if (!adminExists) {
+            user.setRoles(List.of(Role.ROLE_ADMIN));
+        } else {
             user.setRoles(List.of(Role.ROLE_USER));
         }
+
         userRepository.save(user);
     }
 
@@ -62,7 +69,7 @@ public class UserService {
     public UpdateUserResponseDTO updateUser(Long id, UserDTO userDTO) {
         User user = findUserById(id);
         verifyIsNotAdmin(user);
-        updateUserFromDTO(user,userDTO);
+        updateUserFromDTO(user, userDTO);
         userRepository.save(user);
         return UserMapper.toUpdateUserResponseDTO(user);
     }
@@ -81,7 +88,7 @@ public class UserService {
     }
 
     private void verifyIsNotAdmin(User user) {
-        if(user.getRoles().contains(Role.ROLE_ADMIN)) {
+        if (user.getRoles().contains(Role.ROLE_ADMIN)) {
             throw new CannotDeleteAdminException("Cannot proceed action on admin user: " + user.getUsername());
         }
     }
