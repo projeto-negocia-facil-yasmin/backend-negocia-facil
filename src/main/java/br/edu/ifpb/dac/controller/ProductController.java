@@ -2,17 +2,17 @@ package br.edu.ifpb.dac.controller;
 
 import br.edu.ifpb.dac.dto.ProductDTO;
 import br.edu.ifpb.dac.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/api/v1/product")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class ProductController {
 
-    @Autowired
-    private ProductService service;
+    private final ProductService service;
 
     @PostMapping("/create")
     public ProductDTO create(@RequestBody ProductDTO dto) {

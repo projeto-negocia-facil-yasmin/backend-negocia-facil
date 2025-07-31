@@ -11,9 +11,9 @@ import br.edu.ifpb.dac.repository.ProductRepository;
 import br.edu.ifpb.dac.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +25,7 @@ public class ProductService {
 
     public ProductDTO save(ProductDTO dto) {
         try {
-            User user = userRepository.findById(dto.getUserId())
-                    .orElseThrow(() -> new ProductNotFoundException("Usuário não encontrado"));
+            User user = getAuthenticatedUser(); // usa o usuário logado
             Product product = mapper.toEntity(dto, user);
             Product saved = repository.save(product);
             return mapper.toDTO(saved);
@@ -52,9 +51,7 @@ public class ProductService {
             Product existing = repository.findById(id)
                     .orElseThrow(() -> new ProductNotFoundException("Produto não encontrado"));
 
-            User user = userRepository.findById(dto.getUserId())
-                    .orElseThrow(() -> new ProductNotFoundException("Usuário não encontrado"));
-
+            User user = getAuthenticatedUser(); // atribui sempre ao logado
             existing.setTitle(dto.getTitle());
             existing.setDescription(dto.getDescription());
             existing.setPrice(dto.getPrice());
@@ -78,5 +75,14 @@ public class ProductService {
         } catch (Exception e) {
             throw new ProductDeleteException("Erro ao deletar o produto");
         }
+    }
+
+    private User getAuthenticatedUser() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null) {
+            throw new ProductNotFoundException("Usuário não autenticado");
+        }
+        return userRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new ProductNotFoundException("Usuário autenticado não encontrado"));
     }
 }
