@@ -73,5 +73,4 @@ public class AdvertisementController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
 }
