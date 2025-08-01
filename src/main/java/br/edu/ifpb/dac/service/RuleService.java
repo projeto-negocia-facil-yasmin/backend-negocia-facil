@@ -31,6 +31,9 @@ public class RuleService {
     }
 
     public RuleDTO save(RuleDTO dto) {
+        if (repository.existsByTitle(dto.getTitle())) {
+            throw new RuntimeException("Uma regra com este título já existe");
+        }
         Rule rule = RuleMapper.toEntity(dto);
         Rule saved = repository.save(rule);
         return RuleMapper.toDTO(saved);

@@ -45,8 +45,6 @@ public class AdvertisementMapper {
         );
     }
 
-    //Cria uma entidade a partir de um DTO de requisição que não possui ID
-    //pois ainda será criada no banco de dados
     public static Advertisement toEntity(AdvertisementRequestDTO advertisementDTO) {
         Advertisement advertisement = new Advertisement();
         advertisement.setAdvertiser(UserMapper.toEntity(advertisementDTO.advertiser()));
@@ -55,11 +53,10 @@ public class AdvertisementMapper {
         for (ProductDTO productDTO : advertisementDTO.products()) {
             products.add(productMapper.toEntity(productDTO, advertisement.getAdvertiser()));
         }
-        
+
         advertisement.setProducts(products);
         advertisement.setDescription(advertisementDTO.description());
         advertisement.setCreatedAt(advertisementDTO.createdAt());
         return advertisement;
     }
-
 }
