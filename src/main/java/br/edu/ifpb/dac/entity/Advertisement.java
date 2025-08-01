@@ -48,7 +48,7 @@ public class Advertisement {
     
     private List<Product> products;
 
-    @Column(name = "total_price", precision = 5, scale = 2)
+    @Column(name = "total_price", precision = 10, scale = 2)
     @PositiveOrZero
     private BigDecimal totalPrice;
 

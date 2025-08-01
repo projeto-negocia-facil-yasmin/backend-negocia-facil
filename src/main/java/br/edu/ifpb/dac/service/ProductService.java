@@ -9,10 +9,10 @@ import br.edu.ifpb.dac.exception.ProductPersistenceException;
 import br.edu.ifpb.dac.mapper.ProductMapper;
 import br.edu.ifpb.dac.repository.ProductRepository;
 import br.edu.ifpb.dac.repository.UserRepository;
+import br.edu.ifpb.dac.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,7 +42,7 @@ public class ProductService {
     }
 
     public List<ProductDTO> findAll() {
-        if (isAdmin()) {
+        if (SecurityUtils.isAdmin()) {
             return repository.findAll().stream()
                     .map(mapper::toDTO)
                     .collect(Collectors.toList());
@@ -59,7 +59,7 @@ public class ProductService {
         Product product = repository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Produto não encontrado"));
         User user = getAuthenticatedUser();
-        if (!product.getUser().getId().equals(user.getId())) {
+        if (!SecurityUtils.isAdmin() && !product.getUser().getId().equals(user.getId())) {
             throw new ProductNotFoundException("Produto não encontrado");
         }
         return mapper.toDTO(product);
@@ -72,7 +72,7 @@ public class ProductService {
 
             User user = getAuthenticatedUser();
 
-            if (!isAdmin() && !existing.getUser().getId().equals(user.getId())) {
+            if (!SecurityUtils.isAdmin() && !existing.getUser().getId().equals(user.getId())) {
                 throw new ProductPersistenceException("Você não tem permissão para editar este produto");
             }
 
@@ -97,7 +97,7 @@ public class ProductService {
                 .orElseThrow(() -> new ProductNotFoundException("Produto não encontrado"));
         User user = getAuthenticatedUser();
 
-        if (!isAdmin() && !product.getUser().getId().equals(user.getId())) {
+        if (!SecurityUtils.isAdmin() && !product.getUser().getId().equals(user.getId())) {
             throw new ProductDeleteException("Você não tem permissão para deletar este produto");
         }
 
@@ -108,10 +108,16 @@ public class ProductService {
         }
     }
 
-    private boolean isAdmin() {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) return false;
-        return auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    public List<ProductDTO> findAllByUser(User user) {
+        if (SecurityUtils.isAdmin()) {
+            return repository.findAll().stream()
+                    .map(mapper::toDTO)
+                    .collect(Collectors.toList());
+        } else {
+            return repository.findAll().stream()
+                    .filter(p -> p.getUser().getId().equals(user.getId()))
+                    .map(mapper::toDTO)
+                    .collect(Collectors.toList());
+        }
     }
 }
