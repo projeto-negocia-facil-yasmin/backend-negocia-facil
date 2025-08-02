@@ -31,7 +31,7 @@ public class AdvertisementController {
     @GetMapping("/all")
     public ResponseEntity<List<AdvertisementResponseDTO>> getAllAdvertisements() {
         User authenticatedUser = SecurityUtils.getAuthenticatedUser(userRepository);
-        List<AdvertisementResponseDTO> advertisements = advertisementService.getAdvertisementsByUser(authenticatedUser);
+        List<AdvertisementResponseDTO> advertisements = advertisementService.getAllAdvertisements();
 
         if (advertisements.isEmpty()) {
             return ResponseEntity.noContent().build();

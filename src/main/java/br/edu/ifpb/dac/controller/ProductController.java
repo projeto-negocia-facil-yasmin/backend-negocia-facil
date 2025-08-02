@@ -27,8 +27,7 @@ public class ProductController {
 
     @GetMapping("/list")
     public ResponseEntity<List<ProductDTO>> listAll() {
-        User authenticatedUser = SecurityUtils.getAuthenticatedUser(userRepository);
-        List<ProductDTO> products = service.findAllByUser(authenticatedUser);
+        List<ProductDTO> products = service.findAll();
         if (products.isEmpty()) {
             return ResponseEntity.noContent().build();
         }

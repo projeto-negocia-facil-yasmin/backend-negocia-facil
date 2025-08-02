@@ -1,9 +1,8 @@
 package br.edu.ifpb.dac.entity;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -55,7 +54,7 @@ public class Advertisement {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_timestamp")
     @Setter
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     public void calculateTotalPrice(){
         BigDecimal total = products.stream().map(Product::getPrice)
@@ -63,7 +62,6 @@ public class Advertisement {
         this.totalPrice = total;
     }
 
-    //Calcula o preço automaticamente ao definir os produtos
     public void setProducts(List<Product> products) {
         this.products = products;
         calculateTotalPrice();

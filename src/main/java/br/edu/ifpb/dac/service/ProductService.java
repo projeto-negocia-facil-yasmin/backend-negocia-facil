@@ -27,7 +27,7 @@ public class ProductService {
     private User getAuthenticatedUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new ProductNotFoundException("Usuário autenticado não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuário autenticado não encontrado"));
     }
 
     public ProductDTO save(ProductDTO dto) {
@@ -42,26 +42,21 @@ public class ProductService {
     }
 
     public List<ProductDTO> findAll() {
-        if (SecurityUtils.isAdmin()) {
-            return repository.findAll().stream()
-                    .map(mapper::toDTO)
-                    .collect(Collectors.toList());
-        } else {
-            User user = getAuthenticatedUser();
-            return repository.findAll().stream()
-                    .filter(p -> p.getUser().getId().equals(user.getId()))
-                    .map(mapper::toDTO)
-                    .collect(Collectors.toList());
-        }
+        User user = getAuthenticatedUser();
+        return repository.findByUserId(user.getId()).stream()
+                .map(mapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     public ProductDTO findById(Long id) {
         Product product = repository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Produto não encontrado"));
         User user = getAuthenticatedUser();
+
         if (!SecurityUtils.isAdmin() && !product.getUser().getId().equals(user.getId())) {
             throw new ProductNotFoundException("Produto não encontrado");
         }
+
         return mapper.toDTO(product);
     }
 
@@ -95,6 +90,7 @@ public class ProductService {
     public void delete(Long id) {
         Product product = repository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Produto não encontrado"));
+
         User user = getAuthenticatedUser();
 
         if (!SecurityUtils.isAdmin() && !product.getUser().getId().equals(user.getId())) {
@@ -105,19 +101,6 @@ public class ProductService {
             repository.delete(product);
         } catch (Exception e) {
             throw new ProductDeleteException("Erro ao deletar o produto");
-        }
-    }
-
-    public List<ProductDTO> findAllByUser(User user) {
-        if (SecurityUtils.isAdmin()) {
-            return repository.findAll().stream()
-                    .map(mapper::toDTO)
-                    .collect(Collectors.toList());
-        } else {
-            return repository.findAll().stream()
-                    .filter(p -> p.getUser().getId().equals(user.getId()))
-                    .map(mapper::toDTO)
-                    .collect(Collectors.toList());
         }
     }
 }

@@ -1,5 +1,6 @@
 package br.edu.ifpb.dac.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,6 @@ import br.edu.ifpb.dac.mapper.AdvertisementMapper;
 import br.edu.ifpb.dac.repository.AdvertisementRepository;
 import br.edu.ifpb.dac.repository.ProductRepository;
 import br.edu.ifpb.dac.repository.UserRepository;
-import br.edu.ifpb.dac.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -32,14 +32,8 @@ public class AdvertisementService {
         advertisementRepository.save(advertisement);
     }
 
-    public List<AdvertisementResponseDTO> getAdvertisementsByUser(User user) {
-        List<Advertisement> ads;
-
-        if (SecurityUtils.isAdmin()) {
-            ads = advertisementRepository.findAll();
-        } else {
-            ads = advertisementRepository.findByAdvertiserId(user.getId());
-        }
+    public List<AdvertisementResponseDTO> getAllAdvertisements() {
+        List<Advertisement> ads = advertisementRepository.findAll();
 
         return ads.stream()
                 .map(AdvertisementMapper::toResponseDTO)
@@ -74,7 +68,7 @@ public class AdvertisementService {
 
         advertisement.setAdvertiser(advertiser);
         advertisement.setDescription(advertisementDTO.description());
-        advertisement.setCreatedAt(advertisementDTO.createdAt());
+        advertisement.setCreatedAt(LocalDateTime.now());
         advertisement.setProducts(products);
 
         advertisementRepository.save(advertisement);
