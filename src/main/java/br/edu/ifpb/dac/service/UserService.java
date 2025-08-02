@@ -9,6 +9,7 @@ import br.edu.ifpb.dac.exception.CannotDeleteAdminException;
 import br.edu.ifpb.dac.exception.UserNotFoundException;
 import br.edu.ifpb.dac.mapper.UserMapper;
 import br.edu.ifpb.dac.repository.UserRepository;
+import br.edu.ifpb.dac.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,12 +28,13 @@ public class UserService {
     public void register(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        boolean adminExists = userRepository.existsByRoles(Role.ROLE_ADMIN);
-
-        if (!adminExists) {
+        String email = user.getUsername().toLowerCase();
+        if (email.endsWith("@ifpb.edu.br")) {
             user.setRoles(List.of(Role.ROLE_ADMIN));
-        } else {
+        } else if (email.endsWith("@academico.ifpb.edu.br")) {
             user.setRoles(List.of(Role.ROLE_USER));
+        } else {
+            throw new RuntimeException("Email inválido para cadastro.");
         }
 
         userRepository.save(user);
@@ -46,15 +48,39 @@ public class UserService {
     public UserResponseDTO createUser(UserDTO userDTO) {
         User user = UserMapper.toEntity(userDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(List.of(Role.ROLE_USER));
+
+        String email = user.getUsername().toLowerCase();
+        if (email.endsWith("@ifpb.edu.br")) {
+            user.setRoles(List.of(Role.ROLE_ADMIN));
+        } else if (email.endsWith("@academico.ifpb.edu.br")) {
+            user.setRoles(List.of(Role.ROLE_USER));
+        } else {
+            throw new RuntimeException("Email inválido para cadastro.");
+        }
+
         userRepository.save(user);
         return UserMapper.toUserResponseDTO(user);
     }
 
     public void delete(Long id) {
-        User user = findUserById(id);
-        verifyIsNotAdmin(user);
-        userRepository.delete(user);
+        User targetUser = findUserById(id);
+        User authenticatedUser = SecurityUtils.getAuthenticatedUser(userRepository);
+
+        boolean isAdmin = SecurityUtils.isAdmin();
+        boolean isSelf = authenticatedUser.getId().equals(targetUser.getId());
+
+        if (!isAdmin) {
+            throw new SecurityException("Você não tem permissão para deletar este usuário.");
+        }
+
+        if (targetUser.getRoles().contains(Role.ROLE_ADMIN)) {
+            long adminCount = userRepository.countByRolesContaining(Role.ROLE_ADMIN);
+            if (adminCount <= 1) {
+                throw new CannotDeleteAdminException("Não é possível deletar o último administrador.");
+            }
+        }
+
+        userRepository.delete(targetUser);
     }
 
     public Page<UserResponseDTO> getAllUsers(Pageable pageable) {
@@ -67,11 +93,24 @@ public class UserService {
     }
 
     public UpdateUserResponseDTO updateUser(Long id, UserDTO userDTO) {
-        User user = findUserById(id);
-        verifyIsNotAdmin(user);
-        updateUserFromDTO(user, userDTO);
-        userRepository.save(user);
-        return UserMapper.toUpdateUserResponseDTO(user);
+        User targetUser = findUserById(id);
+        User authenticatedUser = SecurityUtils.getAuthenticatedUser(userRepository);
+
+        boolean isAdmin = SecurityUtils.isAdmin();
+        boolean isSelf = authenticatedUser.getId().equals(targetUser.getId());
+
+        if (!isAdmin && !isSelf) {
+            throw new SecurityException("Você não tem permissão para editar este usuário.");
+        }
+
+        if (!isAdmin && targetUser.getRoles().contains(Role.ROLE_ADMIN)) {
+            throw new SecurityException("Você não pode editar um usuário administrador.");
+        }
+
+        updateUserFromDTO(targetUser, userDTO);
+        userRepository.save(targetUser);
+
+        return UserMapper.toUpdateUserResponseDTO(targetUser);
     }
 
     private void updateUserFromDTO(User user, UserDTO userDTO) {
@@ -85,11 +124,5 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(
                 () -> new UserNotFoundException("user with id " + id + " not found")
         );
-    }
-
-    private void verifyIsNotAdmin(User user) {
-        if (user.getRoles().contains(Role.ROLE_ADMIN)) {
-            throw new CannotDeleteAdminException("Cannot proceed action on admin user: " + user.getUsername());
-        }
     }
 }
