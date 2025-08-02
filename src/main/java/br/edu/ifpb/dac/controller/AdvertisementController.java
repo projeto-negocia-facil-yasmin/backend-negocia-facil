@@ -1,22 +1,16 @@
 package br.edu.ifpb.dac.controller;
 
 import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import br.edu.ifpb.dac.dto.AdvertisementRequestDTO;
 import br.edu.ifpb.dac.dto.AdvertisementResponseDTO;
+import br.edu.ifpb.dac.entity.User;
 import br.edu.ifpb.dac.service.AdvertisementService;
+import br.edu.ifpb.dac.util.SecurityUtils;
+import br.edu.ifpb.dac.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 
 @CrossOrigin
@@ -26,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class AdvertisementController {
 
     private final AdvertisementService advertisementService;
+    private final UserRepository userRepository;
 
     @PostMapping("/create")
     public ResponseEntity<AdvertisementRequestDTO> createAdvertisement(@RequestBody AdvertisementRequestDTO advertisementDTO) {
@@ -35,10 +30,11 @@ public class AdvertisementController {
 
     @GetMapping("/all")
     public ResponseEntity<List<AdvertisementResponseDTO>> getAllAdvertisements() {
+        User authenticatedUser = SecurityUtils.getAuthenticatedUser(userRepository);
         List<AdvertisementResponseDTO> advertisements = advertisementService.getAllAdvertisements();
 
-        if (advertisements == null || advertisements.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        if (advertisements.isEmpty()) {
+            return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok(advertisements);
@@ -73,5 +69,4 @@ public class AdvertisementController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
 }

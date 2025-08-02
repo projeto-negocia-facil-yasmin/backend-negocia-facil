@@ -8,13 +8,16 @@ import br.edu.ifpb.dac.dto.AuthResponse;
 import br.edu.ifpb.dac.entity.User;
 import br.edu.ifpb.dac.service.UserDetailsServiceImpl;
 import br.edu.ifpb.dac.util.JwtUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
@@ -27,20 +30,29 @@ public class AuthController {
     private final UserDetailsServiceImpl userDetailsService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserDTO request) {
-        User user = UserMapper.toEntity(request);
-        userService.register(user);
-        return ResponseEntity.ok("User registered successfully");
+    public ResponseEntity<?> register(@RequestBody @Valid UserDTO request) {
+        try {
+            User user = UserMapper.toEntity(request);
+            userService.register(user);
+            return ResponseEntity.status(201).body("User registered successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());
+        }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.username(), request.password())
         );
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.username());
         String token = jwtUtil.generateToken(userDetails);
-        return ResponseEntity.ok(new AuthResponse(token));
+
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(auth -> auth.getAuthority().replace("ROLE_", ""))
+                .toList();
+
+        return ResponseEntity.ok(new AuthResponse(token, roles));
     }
 }

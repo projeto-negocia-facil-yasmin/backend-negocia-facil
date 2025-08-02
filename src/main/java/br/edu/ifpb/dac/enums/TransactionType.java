@@ -1,4 +1,4 @@
-package br.edu.ifpb.dac.entity;
+package br.edu.ifpb.dac.enums;
 
 public enum TransactionType {
     SALE,

@@ -9,9 +9,10 @@ import br.edu.ifpb.dac.exception.ProductPersistenceException;
 import br.edu.ifpb.dac.mapper.ProductMapper;
 import br.edu.ifpb.dac.repository.ProductRepository;
 import br.edu.ifpb.dac.repository.UserRepository;
+import br.edu.ifpb.dac.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,10 +24,15 @@ public class ProductService {
     private final UserRepository userRepository;
     private final ProductMapper mapper;
 
+    private User getAuthenticatedUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuário autenticado não encontrado"));
+    }
+
     public ProductDTO save(ProductDTO dto) {
         try {
-            User user = userRepository.findById(dto.getUserId())
-                    .orElseThrow(() -> new ProductNotFoundException("Usuário não encontrado"));
+            User user = getAuthenticatedUser();
             Product product = mapper.toEntity(dto, user);
             Product saved = repository.save(product);
             return mapper.toDTO(saved);
@@ -36,7 +42,8 @@ public class ProductService {
     }
 
     public List<ProductDTO> findAll() {
-        return repository.findAll().stream()
+        User user = getAuthenticatedUser();
+        return repository.findByUserId(user.getId()).stream()
                 .map(mapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -44,6 +51,12 @@ public class ProductService {
     public ProductDTO findById(Long id) {
         Product product = repository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Produto não encontrado"));
+        User user = getAuthenticatedUser();
+
+        if (!SecurityUtils.isAdmin() && !product.getUser().getId().equals(user.getId())) {
+            throw new ProductNotFoundException("Produto não encontrado");
+        }
+
         return mapper.toDTO(product);
     }
 
@@ -52,8 +65,11 @@ public class ProductService {
             Product existing = repository.findById(id)
                     .orElseThrow(() -> new ProductNotFoundException("Produto não encontrado"));
 
-            User user = userRepository.findById(dto.getUserId())
-                    .orElseThrow(() -> new ProductNotFoundException("Usuário não encontrado"));
+            User user = getAuthenticatedUser();
+
+            if (!SecurityUtils.isAdmin() && !existing.getUser().getId().equals(user.getId())) {
+                throw new ProductPersistenceException("Você não tem permissão para editar este produto");
+            }
 
             existing.setTitle(dto.getTitle());
             existing.setDescription(dto.getDescription());
@@ -61,10 +77,11 @@ public class ProductService {
             existing.setCategory(dto.getCategory());
             existing.setQuantity(dto.getQuantity());
             existing.setForExchange(dto.isForExchange());
-            existing.setUser(user);
 
             Product updated = repository.save(existing);
             return mapper.toDTO(updated);
+        } catch (ProductNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             throw new ProductPersistenceException("Erro ao atualizar o produto: " + e.getMessage());
         }
@@ -73,6 +90,13 @@ public class ProductService {
     public void delete(Long id) {
         Product product = repository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Produto não encontrado"));
+
+        User user = getAuthenticatedUser();
+
+        if (!SecurityUtils.isAdmin() && !product.getUser().getId().equals(user.getId())) {
+            throw new ProductDeleteException("Você não tem permissão para deletar este produto");
+        }
+
         try {
             repository.delete(product);
         } catch (Exception e) {

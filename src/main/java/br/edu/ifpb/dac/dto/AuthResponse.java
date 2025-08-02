@@ -1,3 +1,6 @@
 package br.edu.ifpb.dac.dto;
 
-public record AuthResponse(String accessToken) { }
+import java.util.List;
+
+public record AuthResponse(String accessToken, List<String> roles) { }
+

@@ -2,13 +2,14 @@ package br.edu.ifpb.dac.controller;
 
 import br.edu.ifpb.dac.dto.RuleDTO;
 import br.edu.ifpb.dac.service.RuleService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/rules")
+@RequestMapping("/api/v1/rules")
 @CrossOrigin(origins = "*")
 public class RuleController {
 
@@ -32,12 +33,14 @@ public class RuleController {
 
     @PostMapping
     public ResponseEntity<RuleDTO> create(@RequestBody RuleDTO dto) {
-        return ResponseEntity.ok(service.save(dto));
+        RuleDTO saved = service.save(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<RuleDTO> update(@PathVariable Long id, @RequestBody RuleDTO dto) {
-        return ResponseEntity.ok(service.update(id, dto));
+        RuleDTO updated = service.update(id, dto);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
