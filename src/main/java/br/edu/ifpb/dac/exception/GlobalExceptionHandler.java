@@ -72,4 +72,16 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
+
+    @ExceptionHandler(UnauthorizedUserEditException.class)
+    public ResponseEntity<ApiError> handleUnauthorizedUserEdit(UnauthorizedUserEditException ex, HttpServletRequest request) {
+        ApiError error = new ApiError(
+                HttpStatus.FORBIDDEN.value(),
+                HttpStatus.FORBIDDEN.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
 }

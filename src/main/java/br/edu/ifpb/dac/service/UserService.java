@@ -7,6 +7,7 @@ import br.edu.ifpb.dac.entity.User;
 import br.edu.ifpb.dac.enums.Role;
 import br.edu.ifpb.dac.exception.CannotDeleteAdminException;
 import br.edu.ifpb.dac.exception.LastAdminDeletionException;
+import br.edu.ifpb.dac.exception.UnauthorizedUserEditException;
 import br.edu.ifpb.dac.exception.UserNotFoundException;
 import br.edu.ifpb.dac.mapper.UserMapper;
 import br.edu.ifpb.dac.repository.UserRepository;
@@ -95,15 +96,10 @@ public class UserService {
         User targetUser = findUserById(id);
         User authenticatedUser = SecurityUtils.getAuthenticatedUser(userRepository);
 
-        boolean isAdmin = authenticatedUser.getRoles().contains(Role.ROLE_ADMIN);
         boolean isSelf = authenticatedUser.getId().equals(targetUser.getId());
 
-        if (!isAdmin && !isSelf) {
-            throw new SecurityException("Você não tem permissão para editar este usuário.");
-        }
-
-        if (!isAdmin && targetUser.getRoles().contains(Role.ROLE_ADMIN)) {
-            throw new SecurityException("Você não pode editar um usuário administrador.");
+        if (!isSelf) {
+            throw new UnauthorizedUserEditException("Você não pode editar outro usuário.");
         }
 
         targetUser.setUsername(userDTO.username());
