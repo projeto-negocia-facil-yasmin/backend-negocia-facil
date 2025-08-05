@@ -77,6 +77,7 @@ public class ProductService {
             existing.setCategory(dto.getCategory());
             existing.setQuantity(dto.getQuantity());
             existing.setForExchange(dto.isForExchange());
+            existing.setImageUrl(dto.getImageUrl());
 
             Product updated = repository.save(existing);
             return mapper.toDTO(updated);

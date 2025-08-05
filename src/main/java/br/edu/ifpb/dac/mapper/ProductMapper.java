@@ -18,6 +18,7 @@ public class ProductMapper {
         product.setCategory(dto.getCategory());
         product.setForExchange(dto.isForExchange());
         product.setUser(user);
+        product.setImageUrl(dto.getImageUrl());
         return product;
     }
 
@@ -31,6 +32,7 @@ public class ProductMapper {
         dto.setCategory(product.getCategory());
         dto.setForExchange(product.isForExchange());
         dto.setUserId(product.getUser().getId());
+        dto.setImageUrl(product.getImageUrl());
         return dto;
     }
 }
