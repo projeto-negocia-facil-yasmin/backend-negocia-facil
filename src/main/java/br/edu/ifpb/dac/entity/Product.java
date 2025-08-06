@@ -29,7 +29,8 @@ public class Product {
     @PositiveOrZero
     private int quantity;
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     @ManyToOne
