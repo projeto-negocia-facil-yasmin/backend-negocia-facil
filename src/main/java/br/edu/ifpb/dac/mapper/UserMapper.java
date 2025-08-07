@@ -5,6 +5,7 @@ import br.edu.ifpb.dac.dto.UserDTO;
 import br.edu.ifpb.dac.dto.AdvertisementOwnerDTO;
 import br.edu.ifpb.dac.dto.UserResponseDTO;
 import br.edu.ifpb.dac.entity.User;
+import br.edu.ifpb.dac.enums.Role;
 
 public final class UserMapper {
 
@@ -14,7 +15,9 @@ public final class UserMapper {
                 user.getUsername(),
                 user.getImgUrl(),
                 user.getFullName(),
-                user.getEnrollmentNumber());
+                user.getEnrollmentNumber(),
+                user.getRoles().stream().map(Role::name).toList()
+        );
     }
 
     public static User toEntity(UserDTO dto) {
