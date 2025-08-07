@@ -1,4 +1,5 @@
 package br.edu.ifpb.dac.dto;
+
 import lombok.*;
 
 @Data

@@ -1,6 +1,7 @@
 package br.edu.ifpb.dac.controller;
 
 import java.util.List;
+import br.edu.ifpb.dac.dto.UserResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -68,5 +69,11 @@ public class AdvertisementController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/{id}/advertiser")
+    public ResponseEntity<UserResponseDTO> getAdvertiserByAdvertisementId(@PathVariable Long id) {
+        UserResponseDTO advertiser = advertisementService.getAdvertiserByAdvertisementId(id);
+        return ResponseEntity.ok(advertiser);
     }
 }

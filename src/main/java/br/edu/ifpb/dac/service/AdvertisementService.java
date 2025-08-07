@@ -3,9 +3,9 @@ package br.edu.ifpb.dac.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+import br.edu.ifpb.dac.dto.UserResponseDTO;
+import br.edu.ifpb.dac.util.SecurityUtils;
 import org.springframework.stereotype.Service;
-
 import br.edu.ifpb.dac.dto.AdvertisementRequestDTO;
 import br.edu.ifpb.dac.dto.AdvertisementResponseDTO;
 import br.edu.ifpb.dac.dto.ProductDTO;
@@ -26,12 +26,12 @@ public class AdvertisementService {
     private final AdvertisementRepository advertisementRepository;
     private final ProductRepository productRepository;
     private final AdvertisementMapper advertisementMapper;
+    private final UserService userService;
 
     public void saveAdvertisement(AdvertisementRequestDTO advertisementDTO) {
-        Advertisement advertisement = advertisementMapper.toEntity(advertisementDTO); // uso do mapper injetado
-        User user = userRepository.findById(advertisementDTO.advertiser().id())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        advertisement.setAdvertiser(user);
+        Advertisement advertisement = advertisementMapper.toEntity(advertisementDTO);
+        User authenticatedUser = SecurityUtils.getAuthenticatedUser(userRepository);
+        advertisement.setAdvertiser(authenticatedUser);
         advertisementRepository.save(advertisement);
     }
 
@@ -73,5 +73,12 @@ public class AdvertisementService {
         advertisement.setProducts(products);
 
         advertisementRepository.save(advertisement);
+    }
+
+    public UserResponseDTO getAdvertiserByAdvertisementId(Long advertisementId) {
+        Advertisement ad = advertisementRepository.findById(advertisementId)
+                .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
+        Long advertiserId = ad.getAdvertiser().getId();
+        return userService.getUserById(advertiserId);
     }
 }

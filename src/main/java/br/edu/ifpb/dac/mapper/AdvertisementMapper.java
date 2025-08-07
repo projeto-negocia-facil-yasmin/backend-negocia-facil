@@ -3,7 +3,6 @@ package br.edu.ifpb.dac.mapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import br.edu.ifpb.dac.dto.AdvertisementRequestDTO;
 import br.edu.ifpb.dac.dto.AdvertisementResponseDTO;
 import br.edu.ifpb.dac.dto.ProductDTO;
@@ -20,19 +19,6 @@ public class AdvertisementMapper {
 
     private final ProductMapper productMapper;
     private final CategoryRepository categoryRepository;
-
-    public AdvertisementRequestDTO toRequestDTO(Advertisement advertisement) {
-        return new AdvertisementRequestDTO(
-                UserMapper.toAdvertisementOwnerDTO(advertisement.getAdvertiser()),
-
-                advertisement.getProducts().stream()
-                        .map(productMapper::toDTO)
-                        .collect(Collectors.toList()),
-
-                advertisement.getTotalPrice(),
-                advertisement.getCreatedAt()
-        );
-    }
 
     public AdvertisementResponseDTO toResponseDTO(Advertisement advertisement) {
         return new AdvertisementResponseDTO(

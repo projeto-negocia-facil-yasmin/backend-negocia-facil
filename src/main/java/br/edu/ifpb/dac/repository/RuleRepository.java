@@ -1,4 +1,5 @@
 package br.edu.ifpb.dac.repository;
+
 import br.edu.ifpb.dac.entity.Rule;
 import org.springframework.data.jpa.repository.JpaRepository;
 
