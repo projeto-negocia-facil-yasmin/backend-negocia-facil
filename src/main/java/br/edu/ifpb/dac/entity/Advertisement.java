@@ -37,9 +37,6 @@ public class Advertisement {
     @Setter
     private User advertiser;
 
-    @Setter
-    private String description;
-
     @ManyToMany
     @JoinTable(name = "advertisement_products",
                 inverseJoinColumns = 

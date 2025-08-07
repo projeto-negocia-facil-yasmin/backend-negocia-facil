@@ -5,7 +5,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
 import java.util.Date;
 import java.util.List;
 
@@ -46,5 +45,4 @@ public class JwtUtil {
                 .getExpiresAt();
         return (username.equals(userDetails.getUsername()) && expiration.after(new Date()));
     }
-
 }

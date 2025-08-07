@@ -1,12 +1,14 @@
 package br.edu.ifpb.dac.service;
 
 import br.edu.ifpb.dac.dto.ProductDTO;
+import br.edu.ifpb.dac.entity.Category;
 import br.edu.ifpb.dac.entity.Product;
 import br.edu.ifpb.dac.entity.User;
 import br.edu.ifpb.dac.exception.ProductDeleteException;
 import br.edu.ifpb.dac.exception.ProductNotFoundException;
 import br.edu.ifpb.dac.exception.ProductPersistenceException;
 import br.edu.ifpb.dac.mapper.ProductMapper;
+import br.edu.ifpb.dac.repository.CategoryRepository;
 import br.edu.ifpb.dac.repository.ProductRepository;
 import br.edu.ifpb.dac.repository.UserRepository;
 import br.edu.ifpb.dac.util.SecurityUtils;
@@ -23,6 +25,7 @@ public class ProductService {
     private final ProductRepository repository;
     private final UserRepository userRepository;
     private final ProductMapper mapper;
+    private final CategoryRepository categoryRepository;
 
     private User getAuthenticatedUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -33,13 +36,19 @@ public class ProductService {
     public ProductDTO save(ProductDTO dto) {
         try {
             User user = getAuthenticatedUser();
-            Product product = mapper.toEntity(dto, user);
+
+            Category category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+
+            Product product = mapper.toEntity(dto, user, category);
+
             Product saved = repository.save(product);
             return mapper.toDTO(saved);
         } catch (Exception e) {
             throw new ProductPersistenceException("Erro ao cadastrar o produto: " + e.getMessage());
         }
     }
+
 
     public List<ProductDTO> findAll() {
         User user = getAuthenticatedUser();
@@ -71,12 +80,16 @@ public class ProductService {
                 throw new ProductPersistenceException("Você não tem permissão para editar este produto");
             }
 
+            Category category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+
             existing.setTitle(dto.getTitle());
             existing.setDescription(dto.getDescription());
             existing.setPrice(dto.getPrice());
-            existing.setCategory(dto.getCategory());
+            existing.setCategory(category);
             existing.setQuantity(dto.getQuantity());
             existing.setForExchange(dto.isForExchange());
+            existing.setImageUrl(dto.getImageUrl());
 
             Product updated = repository.save(existing);
             return mapper.toDTO(updated);

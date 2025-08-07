@@ -5,8 +5,8 @@ import br.edu.ifpb.dac.dto.UserDTO;
 import br.edu.ifpb.dac.dto.UserResponseDTO;
 import br.edu.ifpb.dac.entity.User;
 import br.edu.ifpb.dac.enums.Role;
-import br.edu.ifpb.dac.exception.CannotDeleteAdminException;
 import br.edu.ifpb.dac.exception.LastAdminDeletionException;
+import br.edu.ifpb.dac.exception.UnauthorizedUserEditException;
 import br.edu.ifpb.dac.exception.UserNotFoundException;
 import br.edu.ifpb.dac.mapper.UserMapper;
 import br.edu.ifpb.dac.repository.UserRepository;
@@ -16,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -41,14 +40,10 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void registerAdm(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-    }
-
     public UserResponseDTO createUser(UserDTO userDTO) {
         User user = UserMapper.toEntity(userDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPhone(userDTO.phone());
 
         String email = user.getUsername().toLowerCase();
         if (email.endsWith("@ifpb.edu.br")) {
@@ -95,21 +90,17 @@ public class UserService {
         User targetUser = findUserById(id);
         User authenticatedUser = SecurityUtils.getAuthenticatedUser(userRepository);
 
-        boolean isAdmin = authenticatedUser.getRoles().contains(Role.ROLE_ADMIN);
         boolean isSelf = authenticatedUser.getId().equals(targetUser.getId());
 
-        if (!isAdmin && !isSelf) {
-            throw new SecurityException("Você não tem permissão para editar este usuário.");
-        }
-
-        if (!isAdmin && targetUser.getRoles().contains(Role.ROLE_ADMIN)) {
-            throw new SecurityException("Você não pode editar um usuário administrador.");
+        if (!isSelf) {
+            throw new UnauthorizedUserEditException("Você não pode editar outro usuário.");
         }
 
         targetUser.setUsername(userDTO.username());
         targetUser.setPassword(passwordEncoder.encode(userDTO.password()));
         targetUser.setFullName(userDTO.fullName());
         targetUser.setEnrollmentNumber(userDTO.enrollmentNumber());
+        targetUser.setPhone(userDTO.phone());
 
         userRepository.save(targetUser);
         return UserMapper.toUpdateUserResponseDTO(targetUser);

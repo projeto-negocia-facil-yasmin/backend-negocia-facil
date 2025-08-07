@@ -3,6 +3,8 @@ package br.edu.ifpb.dac.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import br.edu.ifpb.dac.dto.UserResponseDTO;
+import br.edu.ifpb.dac.util.SecurityUtils;
 import org.springframework.stereotype.Service;
 import br.edu.ifpb.dac.dto.AdvertisementRequestDTO;
 import br.edu.ifpb.dac.dto.AdvertisementResponseDTO;
@@ -23,27 +25,27 @@ public class AdvertisementService {
     private final UserRepository userRepository;
     private final AdvertisementRepository advertisementRepository;
     private final ProductRepository productRepository;
+    private final AdvertisementMapper advertisementMapper;
+    private final UserService userService;
 
     public void saveAdvertisement(AdvertisementRequestDTO advertisementDTO) {
-        Advertisement advertisement = AdvertisementMapper.toEntity(advertisementDTO);
-        User user = userRepository.findById(advertisementDTO.advertiser().id())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        advertisement.setAdvertiser(user);
+        Advertisement advertisement = advertisementMapper.toEntity(advertisementDTO);
+        User authenticatedUser = SecurityUtils.getAuthenticatedUser(userRepository);
+        advertisement.setAdvertiser(authenticatedUser);
         advertisementRepository.save(advertisement);
     }
 
     public List<AdvertisementResponseDTO> getAllAdvertisements() {
         List<Advertisement> ads = advertisementRepository.findAll();
-
         return ads.stream()
-                .map(AdvertisementMapper::toResponseDTO)
+                .map(advertisementMapper::toResponseDTO)
                 .toList();
     }
 
     public AdvertisementResponseDTO getAdvertisementById(Long id) {
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
-        return AdvertisementMapper.toResponseDTO(advertisement);
+        return advertisementMapper.toResponseDTO(advertisement);
     }
 
     public void deleteAdvertisement(Long id) {
@@ -67,10 +69,16 @@ public class AdvertisementService {
         }
 
         advertisement.setAdvertiser(advertiser);
-        advertisement.setDescription(advertisementDTO.description());
         advertisement.setCreatedAt(LocalDateTime.now());
         advertisement.setProducts(products);
 
         advertisementRepository.save(advertisement);
+    }
+
+    public UserResponseDTO getAdvertiserByAdvertisementId(Long advertisementId) {
+        Advertisement ad = advertisementRepository.findById(advertisementId)
+                .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
+        Long advertiserId = ad.getAdvertiser().getId();
+        return userService.getUserById(advertiserId);
     }
 }

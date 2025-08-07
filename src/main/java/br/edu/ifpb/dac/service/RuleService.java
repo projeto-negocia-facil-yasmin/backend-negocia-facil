@@ -5,7 +5,6 @@ import br.edu.ifpb.dac.entity.Rule;
 import br.edu.ifpb.dac.mapper.RuleMapper;
 import br.edu.ifpb.dac.repository.RuleRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

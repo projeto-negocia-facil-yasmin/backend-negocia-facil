@@ -14,7 +14,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
 
 @Component
@@ -29,7 +28,8 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getServletPath();
-        if (path.startsWith("/auth")) {
+
+        if (path.startsWith("/auth") || path.equals("/health")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -47,7 +47,6 @@ public class JwtFilter extends OncePerRequestFilter {
                     var authorities = jwtUtil.extractRoles(token).stream()
                             .map(SimpleGrantedAuthority::new)
                             .toList();
-                    System.out.println("Roles extraídas do token: " + authorities);
 
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
@@ -55,7 +54,6 @@ public class JwtFilter extends OncePerRequestFilter {
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
-
             }
         }
 

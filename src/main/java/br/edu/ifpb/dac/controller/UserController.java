@@ -3,7 +3,11 @@ package br.edu.ifpb.dac.controller;
 import br.edu.ifpb.dac.dto.UpdateUserResponseDTO;
 import br.edu.ifpb.dac.dto.UserDTO;
 import br.edu.ifpb.dac.dto.UserResponseDTO;
+import br.edu.ifpb.dac.entity.User;
+import br.edu.ifpb.dac.mapper.UserMapper;
+import br.edu.ifpb.dac.repository.UserRepository;
 import br.edu.ifpb.dac.service.UserService;
+import br.edu.ifpb.dac.util.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +24,7 @@ import java.net.URI;
 public class UserController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -52,5 +57,12 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UpdateUserResponseDTO> updateUser(@PathVariable Long id, @RequestBody @Valid UserDTO userDTO) {
         return ResponseEntity.ok(userService.updateUser(id, userDTO));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDTO> getLoggedUser() {
+        User authenticatedUser = SecurityUtils.getAuthenticatedUser(userRepository);
+        UserResponseDTO userDTO = UserMapper.toUserResponseDTO(authenticatedUser);
+        return ResponseEntity.ok(userDTO);
     }
 }

@@ -1,10 +1,8 @@
 package br.edu.ifpb.dac.controller;
 
 import br.edu.ifpb.dac.dto.ProductDTO;
-import br.edu.ifpb.dac.entity.User;
 import br.edu.ifpb.dac.repository.UserRepository;
 import br.edu.ifpb.dac.service.ProductService;
-import br.edu.ifpb.dac.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
