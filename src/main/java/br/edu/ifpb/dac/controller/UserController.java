@@ -1,5 +1,6 @@
 package br.edu.ifpb.dac.controller;
 
+import br.edu.ifpb.dac.dto.AdvertiserPublicDTO;
 import br.edu.ifpb.dac.dto.UpdateUserResponseDTO;
 import br.edu.ifpb.dac.dto.UserDTO;
 import br.edu.ifpb.dac.dto.UserResponseDTO;
@@ -64,5 +65,12 @@ public class UserController {
         User authenticatedUser = SecurityUtils.getAuthenticatedUser(userRepository);
         UserResponseDTO userDTO = UserMapper.toUserResponseDTO(authenticatedUser);
         return ResponseEntity.ok(userDTO);
+    }
+
+    @GetMapping("/{id}/public")
+    public ResponseEntity<AdvertiserPublicDTO> getPublicAdvertiserInfo(@PathVariable Long id) {
+        UserResponseDTO userDto = userService.getUserById(id);
+        AdvertiserPublicDTO dto = new AdvertiserPublicDTO(userDto.fullName(), userDto.phone());
+        return ResponseEntity.ok(dto);
     }
 }

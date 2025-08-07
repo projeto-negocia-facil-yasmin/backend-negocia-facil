@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/auth/login", "/auth/register", "/health").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/advertisements/*/public").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

@@ -40,11 +40,6 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void registerAdm(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-    }
-
     public UserResponseDTO createUser(UserDTO userDTO) {
         User user = UserMapper.toEntity(userDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
