@@ -9,7 +9,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 public record AdvertisementRequestDTO(
     AdvertisementOwnerDTO advertiser,
     List<ProductDTO> products,
-    String description,
     @PositiveOrZero
     BigDecimal totalPrice,
     LocalDateTime createdAt

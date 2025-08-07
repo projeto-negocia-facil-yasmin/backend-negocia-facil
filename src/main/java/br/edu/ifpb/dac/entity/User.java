@@ -4,7 +4,6 @@ import br.edu.ifpb.dac.enums.Role;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,29 +21,33 @@ public class User {
     private String imgUrl;
     private String fullName;
     private String enrollmentNumber;
+    private String phone;
 
-    public User(String username, String password, String fullName, String enrollmentNumber) {
+    public User(String username, String password, String fullName, String enrollmentNumber, String phone) {
         this.username = username;
         this.password = password;
         this.fullName = fullName;
         this.enrollmentNumber = enrollmentNumber;
+        this.phone = phone;
     }
 
-    public User(Long id, String username, String imgUrl, String fullName, String enrollmentNumber) {
+    public User(Long id, String username, String imgUrl, String fullName, String enrollmentNumber, String phone) {
         this.id = id;
         this.username = username;
         this.imgUrl = imgUrl;
         this.fullName = fullName;
         this.enrollmentNumber = enrollmentNumber;
+        this.phone = phone;
     }
 
-    public User(Long id, String username, String password, String imgUrl, String fullName, String enrollmentNumber) {
+    public User(Long id, String username, String password, String imgUrl, String fullName, String enrollmentNumber, String phone) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.imgUrl = imgUrl;
         this.fullName = fullName;
         this.enrollmentNumber = enrollmentNumber;
+        this.phone = phone;
     }
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -55,5 +58,4 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private List<Role> roles = new ArrayList<>();
-
 }

@@ -16,25 +16,29 @@ public final class UserMapper {
                 user.getImgUrl(),
                 user.getFullName(),
                 user.getEnrollmentNumber(),
+                user.getPhone(),
                 user.getRoles().stream().map(Role::name).toList()
         );
     }
 
     public static User toEntity(UserDTO dto) {
-        return new User(
-                dto.username(),
-                dto.password(),
-                dto.fullName(),
-                dto.enrollmentNumber());
+        User user = new User();
+        user.setUsername(dto.username());
+        user.setPassword(dto.password());
+        user.setFullName(dto.fullName());
+        user.setEnrollmentNumber(dto.enrollmentNumber());
+        user.setPhone(dto.phone());
+        return user;
     }
 
     public static User toEntity(AdvertisementOwnerDTO advertisementOwnerDTO) {
-        return new User(
-                advertisementOwnerDTO.id(),
-                advertisementOwnerDTO.username(),
-                advertisementOwnerDTO.imgUrl(),
-                advertisementOwnerDTO.fullName(),
-                advertisementOwnerDTO.enrollmentNumber());
+        User user = new User();
+        user.setId(advertisementOwnerDTO.id());
+        user.setUsername(advertisementOwnerDTO.username());
+        user.setImgUrl(advertisementOwnerDTO.imgUrl());
+        user.setFullName(advertisementOwnerDTO.fullName());
+        user.setEnrollmentNumber(advertisementOwnerDTO.enrollmentNumber());
+        return user;
     }
 
     public static AdvertisementOwnerDTO toAdvertisementOwnerDTO(User user) {
@@ -43,15 +47,17 @@ public final class UserMapper {
                 user.getUsername(),
                 user.getImgUrl(),
                 user.getFullName(),
-                user.getEnrollmentNumber());
+                user.getEnrollmentNumber()
+        );
     }
 
     public static UpdateUserResponseDTO toUpdateUserResponseDTO(User user) {
         return new UpdateUserResponseDTO(
-              user.getId(),
-              user.getUsername(),
-              user.getFullName(),
-              user.getEnrollmentNumber()
+                user.getId(),
+                user.getUsername(),
+                user.getFullName(),
+                user.getEnrollmentNumber(),
+                user.getPhone()
         );
     }
 }

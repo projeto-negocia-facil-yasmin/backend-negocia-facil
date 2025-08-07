@@ -29,7 +29,6 @@ public class AdvertisementMapper {
                         .map(productMapper::toDTO)
                         .collect(Collectors.toList()),
 
-                advertisement.getDescription(),
                 advertisement.getTotalPrice(),
                 advertisement.getCreatedAt()
         );
@@ -44,7 +43,6 @@ public class AdvertisementMapper {
                         .map(productMapper::toDTO)
                         .collect(Collectors.toList()),
 
-                advertisement.getDescription(),
                 advertisement.getTotalPrice(),
                 advertisement.getCreatedAt()
         );
@@ -63,7 +61,6 @@ public class AdvertisementMapper {
         }
 
         advertisement.setProducts(products);
-        advertisement.setDescription(advertisementDTO.description());
         advertisement.setCreatedAt(advertisementDTO.createdAt());
         return advertisement;
     }

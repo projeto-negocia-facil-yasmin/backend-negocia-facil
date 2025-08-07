@@ -5,7 +5,6 @@ import br.edu.ifpb.dac.dto.UserDTO;
 import br.edu.ifpb.dac.dto.UserResponseDTO;
 import br.edu.ifpb.dac.entity.User;
 import br.edu.ifpb.dac.enums.Role;
-import br.edu.ifpb.dac.exception.CannotDeleteAdminException;
 import br.edu.ifpb.dac.exception.LastAdminDeletionException;
 import br.edu.ifpb.dac.exception.UnauthorizedUserEditException;
 import br.edu.ifpb.dac.exception.UserNotFoundException;
@@ -17,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -50,6 +48,7 @@ public class UserService {
     public UserResponseDTO createUser(UserDTO userDTO) {
         User user = UserMapper.toEntity(userDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPhone(userDTO.phone());
 
         String email = user.getUsername().toLowerCase();
         if (email.endsWith("@ifpb.edu.br")) {
@@ -106,6 +105,7 @@ public class UserService {
         targetUser.setPassword(passwordEncoder.encode(userDTO.password()));
         targetUser.setFullName(userDTO.fullName());
         targetUser.setEnrollmentNumber(userDTO.enrollmentNumber());
+        targetUser.setPhone(userDTO.phone());
 
         userRepository.save(targetUser);
         return UserMapper.toUpdateUserResponseDTO(targetUser);

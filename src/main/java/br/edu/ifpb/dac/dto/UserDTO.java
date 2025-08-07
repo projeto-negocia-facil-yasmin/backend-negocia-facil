@@ -11,7 +11,13 @@ public record UserDTO(
                 message = "Email deve terminar com @ifpb.edu.br ou @academico.ifpb.edu.br"
         )
         String username,
-        @NotBlank @Size(min = 8, max = 30) String password,
-        @NotBlank String fullName,
-        @NotBlank String enrollmentNumber
-) { }
+        @NotBlank
+        @Size(min = 8, max = 30)
+        String password,
+        @NotBlank
+        String fullName,
+        @NotBlank
+        String enrollmentNumber,
+        @NotBlank
+        String phone
+) {}

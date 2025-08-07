@@ -69,7 +69,6 @@ public class AdvertisementService {
         }
 
         advertisement.setAdvertiser(advertiser);
-        advertisement.setDescription(advertisementDTO.description());
         advertisement.setCreatedAt(LocalDateTime.now());
         advertisement.setProducts(products);
 

@@ -8,5 +8,6 @@ public record UserResponseDTO(
         String imgUrl,
         String fullName,
         String enrollmentNumber,
+        String phone,
         List<String> roles
-) { }
+) {}

@@ -10,7 +10,6 @@ public record AdvertisementResponseDTO(
     Long id,
     AdvertisementOwnerDTO advertiser,
     List<ProductDTO> products,
-    String description,
     @PositiveOrZero
     BigDecimal totalPrice,
     LocalDateTime createdAt
