@@ -35,7 +35,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/auth/login", "/auth/register", "/health").permitAll()
                         .requestMatchers("/api/v1/advertisements/**").permitAll()
-                        .requestMatchers("/api/v1/categories/**").permitAll()   // libera endpoint categorias
+                        .requestMatchers("/api/v1/categories/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
