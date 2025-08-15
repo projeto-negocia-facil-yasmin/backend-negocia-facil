@@ -28,6 +28,7 @@ public final class UserMapper {
         user.setFullName(dto.fullName());
         user.setEnrollmentNumber(dto.enrollmentNumber());
         user.setPhone(dto.phone());
+        user.setImgUrl(dto.imgUrl());
         return user;
     }
 

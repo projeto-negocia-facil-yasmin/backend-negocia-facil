@@ -19,5 +19,6 @@ public record UserDTO(
         @NotBlank
         String enrollmentNumber,
         @NotBlank
-        String phone
+        String phone,
+        String imgUrl
 ) {}
