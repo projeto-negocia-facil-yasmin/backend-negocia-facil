@@ -26,11 +26,6 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
-    @ExceptionHandler(ProductDeleteException.class)
-    public ResponseEntity<ApiError> handleProductDelete(ProductDeleteException ex, HttpServletRequest request) {
-        return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, request);
-    }
-
     @ExceptionHandler(LastAdminDeletionException.class)
     public ResponseEntity<ApiError> handleLastAdminDeletion(LastAdminDeletionException ex, HttpServletRequest request) {
         return buildErrorResponse(ex, HttpStatus.CONFLICT, request);
@@ -59,6 +54,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidAdvertisementException.class)
     public ResponseEntity<ApiError> handleInvalidAdvertisement(InvalidAdvertisementException ex, HttpServletRequest request) {
         return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(ProductHasAdvertisementException.class)
+    public ResponseEntity<ApiError> handleProductHasAdvertisement(ProductHasAdvertisementException ex, HttpServletRequest request) {
+        return buildErrorResponse(ex, HttpStatus.CONFLICT, request);
     }
 
     private ResponseEntity<ApiError> buildErrorResponse(RuntimeException ex, HttpStatus status, HttpServletRequest request) {
