@@ -5,5 +5,6 @@ public record UpdateUserResponseDTO(
         String username,
         String fullName,
         String enrollmentNumber,
-        String phone
+        String phone,
+        String imgUrl
 ) {}

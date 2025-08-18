@@ -58,7 +58,8 @@ public final class UserMapper {
                 user.getUsername(),
                 user.getFullName(),
                 user.getEnrollmentNumber(),
-                user.getPhone()
+                user.getPhone(),
+                user.getImgUrl()
         );
     }
 }
