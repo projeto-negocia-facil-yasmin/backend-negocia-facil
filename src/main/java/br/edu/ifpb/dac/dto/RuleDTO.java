@@ -10,4 +10,5 @@ public class RuleDTO {
     private String title;
     private String description;
     private boolean active;
+    private Long userId;
 }

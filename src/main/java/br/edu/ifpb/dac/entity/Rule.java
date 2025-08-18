@@ -1,10 +1,7 @@
 package br.edu.ifpb.dac.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -19,11 +16,9 @@ public class Rule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter
     @Column(nullable = false, unique = true)
     private String title;
 
-    @Setter
     @Column(nullable = false)
     private String description;
 
@@ -33,9 +28,12 @@ public class Rule {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Setter
     @Column(nullable = false)
     private boolean active;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @PrePersist
     protected void onCreate() {
@@ -47,5 +45,4 @@ public class Rule {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
-
 }

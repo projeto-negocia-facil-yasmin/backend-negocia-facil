@@ -61,6 +61,31 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.CONFLICT, request);
     }
 
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<ApiError> handleCategoryNotFound(CategoryNotFoundException ex, HttpServletRequest request) {
+        return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
+    }
+
+    @ExceptionHandler(CategoryPersistenceException.class)
+    public ResponseEntity<ApiError> handleCategoryPersistence(CategoryPersistenceException ex, HttpServletRequest request) {
+        return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, request);
+    }
+
+    @ExceptionHandler(RuleNotFoundException.class)
+    public ResponseEntity<ApiError> handleRuleNotFound(RuleNotFoundException ex, HttpServletRequest request) {
+        return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
+    }
+
+    @ExceptionHandler(RulePersistenceException.class)
+    public ResponseEntity<ApiError> handleRulePersistence(RulePersistenceException ex, HttpServletRequest request) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(UnauthorizedRuleEditException.class)
+    public ResponseEntity<ApiError> handleUnauthorizedRuleEdit(UnauthorizedRuleEditException ex, HttpServletRequest request) {
+        return buildErrorResponse(ex, HttpStatus.FORBIDDEN, request);
+    }
+
     private ResponseEntity<ApiError> buildErrorResponse(RuntimeException ex, HttpStatus status, HttpServletRequest request) {
         ApiError error = new ApiError(
                 status.value(),

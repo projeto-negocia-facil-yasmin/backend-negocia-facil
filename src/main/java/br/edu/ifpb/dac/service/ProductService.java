@@ -29,7 +29,7 @@ public class ProductService {
             User user = getAuthenticatedUser();
 
             Category category = categoryRepository.findById(dto.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+                    .orElseThrow(() -> new CategoryNotFoundException("Categoria não encontrada"));
 
             Product product = mapper.toEntity(dto, user, category);
             Product saved = repository.save(product);
