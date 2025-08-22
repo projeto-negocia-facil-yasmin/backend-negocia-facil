@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/auth/login", "/auth/register", "/health").permitAll()
                         .requestMatchers("/api/v1/advertisements/*/advertiser").permitAll()
+                        .requestMatchers("/suap/auth").permitAll()
                         .anyRequest().authenticated()
                 )
 
