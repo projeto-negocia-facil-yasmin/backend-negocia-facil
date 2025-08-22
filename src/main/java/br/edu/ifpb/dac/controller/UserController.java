@@ -30,7 +30,6 @@ public class UserController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> createUser(@RequestBody @Valid UserDTO userDTO) {
-        // usa o método do serviço adaptado para SUAP
         User createdUser = userService.getOrCreateUserFromSuap(
                 userDTO.username(),
                 userDTO.fullName(),
