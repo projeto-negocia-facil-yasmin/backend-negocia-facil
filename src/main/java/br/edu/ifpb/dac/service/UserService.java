@@ -14,8 +14,9 @@ import br.edu.ifpb.dac.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -23,39 +24,30 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public void register(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+    public User getOrCreateUserFromSuap(String username,
+                                        String fullName,
+                                        String enrollmentNumber,
+                                        String phone,
+                                        String imgUrl) {
 
-        String email = user.getUsername().toLowerCase();
-        if (email.endsWith("@ifpb.edu.br")) {
-            user.setRoles(List.of(Role.ROLE_ADMIN));
-        } else if (email.endsWith("@academico.ifpb.edu.br")) {
-            user.setRoles(List.of(Role.ROLE_USER));
-        } else {
-            throw new RuntimeException("Email inválido para cadastro.");
-        }
+        return userRepository.findByEnrollmentNumber(enrollmentNumber)
+                .orElseGet(() -> {
+                    User newUser = new User();
+                    newUser.setUsername(username);
+                    newUser.setFullName(fullName);
+                    newUser.setEnrollmentNumber(enrollmentNumber);
+                    newUser.setPhone(phone);
+                    newUser.setImgUrl(imgUrl);
 
-        userRepository.save(user);
-    }
+                    if (username.toLowerCase().endsWith("@ifpb.edu.br")) {
+                        newUser.setRoles(List.of(Role.ROLE_ADMIN));
+                    } else {
+                        newUser.setRoles(List.of(Role.ROLE_USER));
+                    }
 
-    public UserResponseDTO createUser(UserDTO userDTO) {
-        User user = UserMapper.toEntity(userDTO);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setPhone(userDTO.phone());
-
-        String email = user.getUsername().toLowerCase();
-        if (email.endsWith("@ifpb.edu.br")) {
-            user.setRoles(List.of(Role.ROLE_ADMIN));
-        } else if (email.endsWith("@academico.ifpb.edu.br")) {
-            user.setRoles(List.of(Role.ROLE_USER));
-        } else {
-            throw new RuntimeException("Email inválido para cadastro.");
-        }
-
-        userRepository.save(user);
-        return UserMapper.toUserResponseDTO(user);
+                    return userRepository.save(newUser);
+                });
     }
 
     public void delete(Long id) {
@@ -97,9 +89,6 @@ public class UserService {
         }
 
         targetUser.setUsername(userDTO.username());
-        if (userDTO.password() != null && !userDTO.password().trim().isEmpty()) {
-            targetUser.setPassword(passwordEncoder.encode(userDTO.password()));
-        }
         targetUser.setFullName(userDTO.fullName());
         targetUser.setEnrollmentNumber(userDTO.enrollmentNumber());
         targetUser.setPhone(userDTO.phone());
@@ -113,5 +102,15 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(
                 () -> new UserNotFoundException("user with id " + id + " not found")
         );
+    }
+
+    public UserDetails toUserDetails(br.edu.ifpb.dac.entity.User appUser) {
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(appUser.getUsername())
+                .password("") // senha não é necessária, SUAP já validou
+                .authorities(appUser.getRoles().stream()
+                        .map(Enum::name)
+                        .toArray(String[]::new))
+                .build();
     }
 }

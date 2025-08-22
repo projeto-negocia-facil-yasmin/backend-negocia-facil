@@ -24,7 +24,6 @@ public final class UserMapper {
     public static User toEntity(UserDTO dto) {
         User user = new User();
         user.setUsername(dto.username());
-        user.setPassword(dto.password());
         user.setFullName(dto.fullName());
         user.setEnrollmentNumber(dto.enrollmentNumber());
         user.setPhone(dto.phone());
