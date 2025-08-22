@@ -12,6 +12,11 @@ import br.edu.ifpb.dac.dto.ProductDTO;
 import br.edu.ifpb.dac.entity.Advertisement;
 import br.edu.ifpb.dac.entity.Product;
 import br.edu.ifpb.dac.entity.User;
+import br.edu.ifpb.dac.exception.AdvertisementNotFoundException;
+import br.edu.ifpb.dac.exception.AdvertisementPersistenceException;
+import br.edu.ifpb.dac.exception.ProductNotFoundException;
+import br.edu.ifpb.dac.exception.UnauthorizedAdvertisementEditException;
+import br.edu.ifpb.dac.exception.UserNotFoundException;
 import br.edu.ifpb.dac.mapper.AdvertisementMapper;
 import br.edu.ifpb.dac.repository.AdvertisementRepository;
 import br.edu.ifpb.dac.repository.ProductRepository;
@@ -29,10 +34,14 @@ public class AdvertisementService {
     private final UserService userService;
 
     public void saveAdvertisement(AdvertisementRequestDTO advertisementDTO) {
-        Advertisement advertisement = advertisementMapper.toEntity(advertisementDTO);
-        User authenticatedUser = SecurityUtils.getAuthenticatedUser(userRepository);
-        advertisement.setAdvertiser(authenticatedUser);
-        advertisementRepository.save(advertisement);
+        try {
+            Advertisement advertisement = advertisementMapper.toEntity(advertisementDTO);
+            User authenticatedUser = SecurityUtils.getAuthenticatedUser(userRepository);
+            advertisement.setAdvertiser(authenticatedUser);
+            advertisementRepository.save(advertisement);
+        } catch (Exception e) {
+            throw new AdvertisementPersistenceException("Erro ao salvar anúncio: " + e.getMessage());
+        }
     }
 
     public List<AdvertisementResponseDTO> getAllAdvertisements() {
@@ -44,27 +53,38 @@ public class AdvertisementService {
 
     public AdvertisementResponseDTO getAdvertisementById(Long id) {
         Advertisement advertisement = advertisementRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
+                .orElseThrow(() -> new AdvertisementNotFoundException("Anúncio com id " + id + " não encontrado"));
         return advertisementMapper.toResponseDTO(advertisement);
     }
 
     public void deleteAdvertisement(Long id) {
         Advertisement advertisement = advertisementRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
+                .orElseThrow(() -> new AdvertisementNotFoundException("Anúncio com id " + id + " não encontrado"));
+
+        User authenticatedUser = SecurityUtils.getAuthenticatedUser(userRepository);
+        if (!advertisement.getAdvertiser().getId().equals(authenticatedUser.getId())) {
+            throw new UnauthorizedAdvertisementEditException("Você não tem permissão para excluir este anúncio");
+        }
+
         advertisementRepository.delete(advertisement);
     }
 
     public void updateAdvertisement(Long id, AdvertisementResponseDTO advertisementDTO) {
         Advertisement advertisement = advertisementRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
+                .orElseThrow(() -> new AdvertisementNotFoundException("Anúncio com id " + id + " não encontrado"));
+
+        User authenticatedUser = SecurityUtils.getAuthenticatedUser(userRepository);
+        if (!advertisement.getAdvertiser().getId().equals(authenticatedUser.getId())) {
+            throw new UnauthorizedAdvertisementEditException("Você não tem permissão para editar este anúncio");
+        }
 
         User advertiser = userRepository.findById(advertisementDTO.advertiser().id())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new UserNotFoundException("Usuário com id " + advertisementDTO.advertiser().id() + " não encontrado"));
 
         List<Product> products = new ArrayList<>();
         for (ProductDTO productDTO : advertisementDTO.products()) {
             Product product = productRepository.findById(productDTO.getId())
-                    .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                    .orElseThrow(() -> new ProductNotFoundException("Produto com id " + productDTO.getId() + " não encontrado"));
             products.add(product);
         }
 
@@ -72,12 +92,16 @@ public class AdvertisementService {
         advertisement.setCreatedAt(LocalDateTime.now());
         advertisement.setProducts(products);
 
-        advertisementRepository.save(advertisement);
+        try {
+            advertisementRepository.save(advertisement);
+        } catch (Exception e) {
+            throw new AdvertisementPersistenceException("Erro ao atualizar anúncio: " + e.getMessage());
+        }
     }
 
     public UserResponseDTO getAdvertiserByAdvertisementId(Long advertisementId) {
         Advertisement ad = advertisementRepository.findById(advertisementId)
-                .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
+                .orElseThrow(() -> new AdvertisementNotFoundException("Anúncio com id " + advertisementId + " não encontrado"));
         Long advertiserId = ad.getAdvertiser().getId();
         return userService.getUserById(advertiserId);
     }

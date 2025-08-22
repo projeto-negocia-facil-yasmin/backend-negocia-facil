@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -39,4 +40,7 @@ public class Product {
 
     @Column(name = "image_url")
     private String imageUrl;
+
+    @ManyToMany(mappedBy = "products")
+    private List<Advertisement> advertisements;
 }

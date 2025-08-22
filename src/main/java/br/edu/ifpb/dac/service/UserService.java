@@ -97,10 +97,13 @@ public class UserService {
         }
 
         targetUser.setUsername(userDTO.username());
-        targetUser.setPassword(passwordEncoder.encode(userDTO.password()));
+        if (userDTO.password() != null && !userDTO.password().trim().isEmpty()) {
+            targetUser.setPassword(passwordEncoder.encode(userDTO.password()));
+        }
         targetUser.setFullName(userDTO.fullName());
         targetUser.setEnrollmentNumber(userDTO.enrollmentNumber());
         targetUser.setPhone(userDTO.phone());
+        targetUser.setImgUrl(userDTO.imgUrl());
 
         userRepository.save(targetUser);
         return UserMapper.toUpdateUserResponseDTO(targetUser);

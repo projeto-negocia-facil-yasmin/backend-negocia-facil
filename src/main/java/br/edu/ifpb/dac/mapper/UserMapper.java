@@ -28,6 +28,7 @@ public final class UserMapper {
         user.setFullName(dto.fullName());
         user.setEnrollmentNumber(dto.enrollmentNumber());
         user.setPhone(dto.phone());
+        user.setImgUrl(dto.imgUrl());
         return user;
     }
 
@@ -57,7 +58,8 @@ public final class UserMapper {
                 user.getUsername(),
                 user.getFullName(),
                 user.getEnrollmentNumber(),
-                user.getPhone()
+                user.getPhone(),
+                user.getImgUrl()
         );
     }
 }
